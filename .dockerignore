@@ -1,0 +1,26 @@
+# Archivos y directorios a ignorar en el build de Docker
+.git
+.gitignore
+.env
+*.md
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Binarios compilados
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+collector
+
+# Archivos de test
+*_test.go
+**/testdata
+
+# Archivos temporales
+*.tmp
+*.log
+.DS_Store
+

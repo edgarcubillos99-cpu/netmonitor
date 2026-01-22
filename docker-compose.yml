@@ -1,0 +1,30 @@
+services:
+  app:
+    build: .
+    environment:
+      # Conecta a MongoDB e InfluxDB (usa servicio local o externo según .env)
+      - MONGO_URI=${MONGO_URI}
+      - INFLUX_URL=${INFLUX_URL:-http://influxdb:8086}
+      - INFLUX_TOKEN=${INFLUX_TOKEN:-my-token}
+      - INFLUX_ORG=${INFLUX_ORG:-my-org}
+      - INFLUX_BUCKET=${INFLUX_BUCKET:-net_metrics}
+      - WORKER_COUNT=${WORKER_COUNT:-50}
+    depends_on:
+      - influxdb
+
+  influxdb:
+    image: influxdb:2.7
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=netmonpass
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUX_ORG:-my-org}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUX_BUCKET:-net_metrics}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUX_TOKEN:-my-token}
+    volumes:
+      - influx_data:/var/lib/influxdb2
+
+volumes:
+  influx_data:
