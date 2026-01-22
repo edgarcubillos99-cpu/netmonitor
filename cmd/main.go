@@ -74,9 +74,20 @@ func main() {
 	ctx := context.Background()
 	go wp.RunCycle(ctx, repo)
 
-	// Ejecución programada
+	// Control de ejecución para evitar solapamiento de ciclos
+	isRunning := false
+
 	for range ticker.C {
-		log.Println("---⏰ Iniciando Ciclo Programado ---")
-		go wp.RunCycle(ctx, repo)
+		if isRunning {
+			log.Println("⚠️ Ciclo anterior aún corriendo. Saltando ejecución.")
+			continue
+		}
+
+		go func() {
+			isRunning = true
+			log.Println("---⏰ Iniciando Ciclo Programado ---")
+			wp.RunCycle(ctx, repo)
+			isRunning = false
+		}()
 	}
 }

@@ -15,7 +15,7 @@ RUN go mod download
 COPY . .
 
 # Compilar la aplicación
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o collector ./cmd/collector
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o collector ./cmd/main.go
 
 # Etapa final - imagen mínima
 FROM alpine:latest

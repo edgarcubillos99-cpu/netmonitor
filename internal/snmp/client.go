@@ -16,6 +16,8 @@ const (
 	oidIfDescr       = ".1.3.6.1.2.1.31.1.1.1.18"
 	oidIfHighSpeed   = ".1.3.6.1.2.1.31.1.1.1.15" // Velocidad en Mbps
 	oidIfOperStatus  = ".1.3.6.1.2.1.2.2.1.8"     // 1=up, 2=down
+	oidIfInOctets    = ".1.3.6.1.2.1.2.2.1.10"    // 32-bit fallback
+	oidIfOutOctets   = ".1.3.6.1.2.1.2.2.1.16"    // 32-bit fallback
 )
 
 type MetricResult struct {
@@ -70,10 +72,15 @@ func FetchMetrics(device models.Device) ([]MetricResult, error) {
 		}
 
 		switch {
-		case strings.HasPrefix(pdu.Name, oidIfHCInOctets):
-			tempData[ifIndex].InOctets = gosnmp.ToBigInt(pdu.Value).Uint64()
-		case strings.HasPrefix(pdu.Name, oidIfHCOutOctets):
-			tempData[ifIndex].OutOctets = gosnmp.ToBigInt(pdu.Value).Uint64()
+		case strings.HasPrefix(pdu.Name, oidIfInOctets):
+			// Solo asignar si no tenemos ya el valor de 64 bits (que es preferido)
+			if tempData[ifIndex].InOctets == 0 {
+				tempData[ifIndex].InOctets = gosnmp.ToBigInt(pdu.Value).Uint64()
+			}
+		case strings.HasPrefix(pdu.Name, oidIfOutOctets):
+			if tempData[ifIndex].OutOctets == 0 {
+				tempData[ifIndex].OutOctets = gosnmp.ToBigInt(pdu.Value).Uint64()
+			}
 		case strings.HasPrefix(pdu.Name, oidIfHighSpeed):
 			tempData[ifIndex].MaxSpeed = gosnmp.ToBigInt(pdu.Value).Uint64()
 		case strings.HasPrefix(pdu.Name, oidIfOperStatus):
@@ -100,6 +107,8 @@ func FetchMetrics(device models.Device) ([]MetricResult, error) {
 		oidIfHighSpeed,
 		oidIfOperStatus,
 		oidIfDescr,
+		oidIfInOctets,
+		oidIfOutOctets,
 	}
 
 	for _, rootOid := range targetOIDs {
